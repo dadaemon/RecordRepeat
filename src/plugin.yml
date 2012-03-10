@@ -1,0 +1,11 @@
+author: zhuowei
+database: false
+description: RecordRepeatPlugin
+main: net.zhuoweizhang.recordrepeat.RecordRepeatPlugin
+name: RecordRepeatPlugin
+startup: postworld
+version: '1.0'
+permissions:
+    recordrepeat.use:
+        description: Use RecordRepeat
+        default: true
