@@ -31,6 +31,17 @@ public class RecordRepeatConfig {
         this.plugin = plugin;
         c = plugin.getConfig();
         n = plugin.getName();
+        
+        String version = c.getString(n + ".Version", "1.0");
+        if (!version.equals(plugin.version)) {
+            // Version 1.0 / 1.1 -> ...
+            // * Added ...
+            if (version.equals("1.0") || version.equals("1.1")) {
+            }
+
+            c.set(n + ".Version", plugin.version);
+            plugin.saveConfig();
+        }
     }
 
     private void reload() {
@@ -44,12 +55,13 @@ public class RecordRepeatConfig {
     }
 
     private void saveConfig() {
-        plugin.writeDebug("Saving config!");
+        plugin.writeDebug("Saving config and reloading!");
         plugin.saveConfig();
         reload();
     }
 
     private void save() {
+        plugin.writeDebug("Saving config!");
         plugin.saveConfig();
     }
 
@@ -89,9 +101,13 @@ public class RecordRepeatConfig {
         return b;
     }
 
-    public void removeJukebox(Block b) {
-        c.set(n + ".JukeBoxes." + blockToString(b), null);
-        save();
+    public boolean removeJukebox(Block b) {
+        if(c.isSet(n + ".JukeBoxes." + blockToString(b))) {
+            c.set(n + ".JukeBoxes." + blockToString(b), null);
+            save();
+            return true;
+        }
+        return false;
     }
 
     void loadJukeBoxes() {
@@ -111,5 +127,14 @@ public class RecordRepeatConfig {
 
     boolean isNotice() {
         return c.getBoolean(n + ".Notice", true);
+    }
+
+    boolean getPlayerRepeatStatus(String name) {
+        return c.getBoolean(n + ".Players." + name + ".RepeatStatus", false);
+    }
+
+    void setPlayerRepeatStatus(String name, boolean repeatStatus) {
+        c.set(n + ".Players." + name + ".RepeatStatus", repeatStatus);
+        this.save();
     }
 }

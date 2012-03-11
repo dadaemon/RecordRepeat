@@ -18,12 +18,14 @@ public class RecordRepeatPlugin extends JavaPlugin {
 
     public RecordRepeatPlayerListener playerListener;
     public PluginDescriptionFile pdfFile;
-    private String name;
+    public String name;
     public RecordRepeatConfig c;
-    private String version;
+    public String version;
     public static final Logger logger = Logger.getLogger("Minecraft");
     public List<RPJB> rJBs; // registeredJukeboxes;
-    /** Length of the record Cat, in seconds. */
+    /**
+     * Length of the record Cat, in seconds.
+     */
     public Map<Integer, Integer> songs = new HashMap<Integer, Integer>();
     private RRTimer rrTimer;
     private int asyncSchedule;
@@ -33,11 +35,11 @@ public class RecordRepeatPlugin extends JavaPlugin {
         pdfFile = this.getDescription();
         name = pdfFile.getName();
         version = pdfFile.getVersion();
-        
+
         // Read config
         c = new RecordRepeatConfig(this);
-        
-        if(c.getConfigDebug()) {
+
+        if (c.getConfigDebug()) {
             writeLog("Debug enabled.");
         }
 
@@ -58,7 +60,7 @@ public class RecordRepeatPlugin extends JavaPlugin {
         // Create and read jukeboxes from config
         rJBs = new ArrayList<RPJB>();
         c.loadJukeBoxes();
-        
+
         playerListener = new RecordRepeatPlayerListener(this);
 
         PluginManager pm = this.getServer().getPluginManager();
@@ -67,6 +69,10 @@ public class RecordRepeatPlugin extends JavaPlugin {
         // Load event timer
         rrTimer = new RRTimer(this);
         asyncSchedule = getServer().getScheduler().scheduleAsyncRepeatingTask(this, rrTimer, 80L, 20L);
+
+        RecordRepeatCommandExecutor ce = new RecordRepeatCommandExecutor(this);
+        getCommand("rr").setExecutor(ce);
+        getCommand("recordrepeat").setExecutor(ce);
 
 
         writeLog("== " + name + " " + version + " ENABLED ==");
@@ -109,7 +115,7 @@ public class RecordRepeatPlugin extends JavaPlugin {
         c.addJukebox(block, recordType);
     }
 
-    public void removeJukebox(Block block) {
+    public boolean removeJukebox(Block block) {
         if (!rJBs.isEmpty()) {
             for (RPJB jb : rJBs) {
                 if (jb.getBlock().equals(block)) {
@@ -119,7 +125,7 @@ public class RecordRepeatPlugin extends JavaPlugin {
                 }
             }
         }
-        c.removeJukebox(block);
+        return c.removeJukebox(block);
     }
 
     private int getRepeatTime(Material recordType) {
@@ -146,8 +152,12 @@ public class RecordRepeatPlugin extends JavaPlugin {
                     }
 
                     Jukebox jukebox = (Jukebox) jb.getBlock().getState();
-                    jukebox.setPlaying(jb.getRecordType());
-                    jb.getBlock().getWorld().playEffect(jb.getBlock().getLocation(), Effect.RECORD_PLAY, jb.getRecordType().getId(), 128);
+                    if (jukebox == null) {
+                        writeDebug("Jukebox is null.");
+                    } else {
+                        jukebox.setPlaying(jb.getRecordType());
+                        jb.getBlock().getWorld().playEffect(jb.getBlock().getLocation(), Effect.RECORD_PLAY, jb.getRecordType().getId(), 128);
+                    }
 
                     Calendar newDate = Calendar.getInstance();
                     newDate.add(Calendar.SECOND, getRepeatTime(jb.getRecordType()));

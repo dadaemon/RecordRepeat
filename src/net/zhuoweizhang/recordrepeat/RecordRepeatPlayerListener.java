@@ -30,19 +30,28 @@ public class RecordRepeatPlayerListener implements Listener {
                 if (jb.getPlaying() != null && jb.getPlaying() != Material.AIR) {
                     if (p.hasPermission("recordrepeat.use")) {
                         plugin.writeDebug("eject");
-                        plugin.removeJukebox(block);
-                        if (plugin.c.isNotice()) {
-                            p.sendMessage(ChatColor.BLUE + "Repeating record has been " + ChatColor.RED + "removed");
+                        if (plugin.removeJukebox(block)) {
+                            if (plugin.c.isNotice()) {
+                                p.sendMessage(ChatColor.BLUE + "Repeating record has been " + ChatColor.RED + "removed" + ChatColor.BLUE + ".");
+                            }
                         }
                     }
                 } else if (plugin.songs.containsKey(item.getTypeId())) {
                     if (p.hasPermission("recordrepeat.use")) {
-                        plugin.addJukebox(block, item.getType());
-                        if (plugin.c.isNotice()) {
-                            p.sendMessage(ChatColor.BLUE + "Repeating record has been " + ChatColor.GREEN + "added");
+                        if (!plugin.c.getPlayerRepeatStatus(p.getName())) {
+                            if (plugin.c.isNotice()) {
+                                p.sendMessage(ChatColor.BLUE + "Record " + ChatColor.RED + "won't" + ChatColor.BLUE + " be repeated.");
+                            }
+                        } else {
+                            plugin.addJukebox(block, item.getType());
+                            if (plugin.c.isNotice()) {
+                                p.sendMessage(ChatColor.BLUE + "Repeating record has been " + ChatColor.GREEN + "added" + ChatColor.BLUE + ".");
+                            }
                         }
                     } else {
-                        p.sendMessage(ChatColor.BLUE + "Your record won't be repeated because of insufficient rights.");
+                        if (plugin.c.isNotice()) {
+                            p.sendMessage(ChatColor.BLUE + "Your record " + ChatColor.RED + "won't " + ChatColor.BLUE + "be repeated because of insufficient rights.");
+                        }
                     }
                 }
             }
